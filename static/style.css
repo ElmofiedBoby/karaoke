@@ -1,0 +1,32 @@
+.vertical-slider {
+    writing-mode: bt-lr; /* Set the writing mode to vertical */
+    -webkit-appearance: slider-vertical; /* Safari and Chrome */
+    width: 20px;
+    height: 100px;
+    margin: 5px;
+}
+.slider-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.seekbar-container {
+    margin: auto;
+    width: 50%;
+}
+label {
+    margin-right: 10px;
+}
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#volume-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+#seekbar {
+    width: 100%;
+}
