@@ -1,9 +1,12 @@
+import time
 from flask import Flask, request, render_template, jsonify, send_file
+from Pipeline import Pipeline
+
+import threading
 import os
-import shutil
-import requests
 
 app = Flask(__name__)
+pipeline = Pipeline()
 
 @app.after_request
 def add_headers(response):
@@ -14,34 +17,23 @@ def add_headers(response):
 def index():
     return render_template('index.html')
 
+@app.route('/downloads')
+def downloads():
+    return render_template('downloads.html')
+
 @app.route('/player')
 def player():
     artist = request.args.get('artist')
     song = request.args.get('song')
-    #shutil.copyfile('separated\\htdemucs_ft\\'+artist+' - '+song+'\\vocals.wav', 'static/vocals.wav')
-    #shutil.copyfile('separated\\htdemucs_ft\\'+artist+' - '+song+'\\no_vocals.wav', 'static/no_vocals.wav')
-    #shutil.copyfile('lrc\\'+artist+' - '+song+'.lrc', 'static/output.lrc')
     return render_template('player.html', artist=artist, song=song)
 
 @app.route('/list', methods=['GET'])
 def get_list():
     return jsonify(os.listdir("separated/htdemucs_ft"))
 
-@app.route('/get', methods=['GET'])
-def get_content():
-    artist = request.args.get('artist')
-    song = request.args.get('song')
-    
-    download_data = requests.get('http://localhost:5000/download?artist='+artist+'&song='+song)
-    song_path = download_data.json()["song_path"]
-    print(song_path)
-    separation_data = requests.get('http://localhost:5000/separate?path='+song_path)
-    paths = separation_data.json()
-    print(paths)
-    generation_data = requests.get('http://localhost:5001/generate?path='+paths["vocals_path"]+'&artist='+artist+'&song='+song)
-    lyric_data = generation_data.json()
-    print(lyric_data)
-    return render_template('player.html', artist=artist, song=song)
+@app.route('/queue')
+def get_queue():
+    return jsonify(pipeline.get_queue())
 
 @app.route('/play', methods=['GET'])
 def get_finished_audio_path():
@@ -59,6 +51,20 @@ def get_lyrics():
     song = request.args.get('song')
     return send_file('lrc\\'+artist+' - '+song+'.lrc', as_attachment=False)
 
+@app.route('/get', methods=['GET'])
+def get_content():
+    artist = request.args.get('artist')
+    song = request.args.get('song')
+    
+    pipeline.add_song(artist, song)
+    return render_template('player.html', artist=artist, song=song)
+
+def run_pipeline():
+    while(True):
+        time.sleep(2)
+        pipeline.add_task()
 
 if __name__ == '__main__':
-    app.run(port=5002, debug=True)
+    pipeline_thread = threading.Thread(target=run_pipeline)
+    pipeline_thread.start()
+    app.run(port=5002, debug=True, use_reloader=False)
