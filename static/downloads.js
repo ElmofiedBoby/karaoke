@@ -1,5 +1,5 @@
 function getList() {
-    return fetch('http://localhost:5002/queue')
+    return fetch('http://localhost:5002/list?state=notfinished')
       .then(response => response.json())
       .catch(error => {
         console.error('Error fetching list:', error);
@@ -12,7 +12,9 @@ function updateList() {
         listDiv.innerHTML = '';
 
         data.forEach(item => {
-            console.log(item);
+            const itemElement = document.createElement('li');
+            itemElement.innerHTML = item;
+            listDiv.appendChild(itemElement);
         });
     }).catch(error => {
         console.error('Error updating list:', error);
@@ -20,3 +22,6 @@ function updateList() {
 }
 
 window.onload = updateList;
+const interval = setInterval(function() {
+    updateList();
+}, 5000);

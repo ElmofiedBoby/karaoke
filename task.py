@@ -1,6 +1,12 @@
 import json
 from enum import Enum
 
+class Task():
+
+    def __init__(self, song):
+        self.song = song
+        self.state = self.song.state
+
 class TaskState(Enum):
     QUEUED = 0
     DOWNLOADING = 15

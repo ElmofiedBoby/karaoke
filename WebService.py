@@ -1,6 +1,7 @@
 import time
 from flask import Flask, request, render_template, jsonify, send_file
 from Pipeline import Pipeline
+from task import TaskState
 
 import threading
 import os
@@ -19,7 +20,7 @@ def index():
 
 @app.route('/downloads')
 def downloads():
-    return render_template('downloads.html')
+    return render_template('download.html')
 
 @app.route('/player')
 def player():
@@ -29,11 +30,37 @@ def player():
 
 @app.route('/list', methods=['GET'])
 def get_list():
-    return jsonify(os.listdir("separated/htdemucs_ft"))
+    state = request.args.get('state')
+    data = []
+
+    if state == 'finished':
+        for item in pipeline.song_list:
+            if item.state == TaskState.FINISHED:
+                data.append(f"{item.artist} - {item.song}")
+    elif state == 'notfinished':
+        for item in pipeline.song_list:
+            if item.state is not TaskState.FINISHED:
+                data.append(f"{item.artist} - {item.song} - {item.state}")
+    else:
+        for item in pipeline.song_list:
+            data.append(f"{item.artist} - {item.song} - {item.state}")
+            
+    return jsonify(data)
 
 @app.route('/queue')
 def get_queue():
-    return jsonify(pipeline.get_queue())
+    returnval = []
+    pipeline_queue = pipeline.get_queue()
+    while not pipeline_queue.empty():
+        item = pipeline_queue.get_nowait()
+        returnval.append({
+            "artist": item.artist,
+            "song": item.song,
+            "state": item.state
+        })
+    
+    print(returnval)
+    return jsonify(returnval)
 
 @app.route('/play', methods=['GET'])
 def get_finished_audio_path():
@@ -56,13 +83,13 @@ def get_content():
     artist = request.args.get('artist')
     song = request.args.get('song')
     
-    pipeline.add_song(artist, song)
-    return render_template('player.html', artist=artist, song=song)
+    pipeline.add_song(artist, song, TaskState.QUEUED)
+    return render_template('download.html')
 
 def run_pipeline():
     while(True):
         time.sleep(2)
-        pipeline.add_task()
+        pipeline.run()
 
 if __name__ == '__main__':
     pipeline_thread = threading.Thread(target=run_pipeline)

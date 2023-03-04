@@ -1,5 +1,5 @@
 function getList() {
-    return fetch('http://localhost:5002/list')
+    return fetch('http://localhost:5002/list?state=finished')
       .then(response => response.json())
       .catch(error => {
         console.error('Error fetching list:', error);

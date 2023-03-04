@@ -1,5 +1,4 @@
-from taskstate import TaskState
-import dramatiq
+from task import TaskState
 
 # Define a task object that includes a command and its arguments
 class Song:
@@ -15,7 +14,6 @@ class Song:
         self.vocals_path = None
         self.lyrics = None
     
-    #@dramatiq.actor(max_retries=3)
     def download(self):
         self.state = TaskState.DOWNLOADING
         print(f'{self.artist} - {self.song}: {self.state}')
@@ -24,7 +22,6 @@ class Song:
         print(f'{self.artist} - {self.song}: {self.state}')
         return download_path
 
-    #@dramatiq.actor(max_retries=3)
     def separate(self, download_path):
         self.state = TaskState.SEPARATING
         print(f'{self.artist} - {self.song}: {self.state}')
@@ -33,7 +30,6 @@ class Song:
         print(f'{self.artist} - {self.song}: {self.state}')
         return vocals_path
 
-    #@dramatiq.actor(max_retries=3)
     def transcribe(self, vocals_path):
         self.state = TaskState.TRANSCRIBING
         print(f'{self.artist} - {self.song}: {self.state}')
