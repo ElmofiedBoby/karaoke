@@ -1,0 +1,30 @@
+version: '3.8'
+
+x-common-env: &redis_env
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+
+services:
+  comm:
+    build: ./comm
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    environment:
+      <<: *redis_env
+
+  downloader:
+    build: ./downloader
+    ports:
+      - "8001:8001"
+    depends_on:
+      - redis
+      - comm
+    environment:
+      <<: *redis_env
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
