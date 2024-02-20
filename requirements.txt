@@ -1,7 +1,0 @@
--e git+https://github.com/elmofiedboby/demucs-me#egg=demucs
-google-api-python-client==2.78.0
-soundfile==0.12.1
-python-dotenv==0.21.1
-yt-dlp==2023.2.17
-openai-whisper==20230124
-celery
